@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reply Form</title>
+<style>
+  :root{
+    --maroon-900:#3d0d15;
+    --maroon-700:#7a1f2b;
+    --maroon-600:#8f2532;
+    --maroon-500:#a53445;
+    --maroon-100:#f3e2e4;
+    --maroon-50:#faf2f3;
+    --white:#ffffff;
+    --paper:#fdfbfb;
+    --ink:#241014;
+    --ink-soft:#6b4a4f;
+    --line:#e7d5d8;
+    --error:#a5222f;
+    --blue-500:#3459d6;
+    --blue-300:#8fa6ec;
+    --shadow-card: 0 1px 2px rgba(61,13,21,0.06), 0 12px 32px -8px rgba(61,13,21,0.22), 0 24px 60px -20px rgba(61,13,21,0.18);
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 7px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    min-height:100%;
+    background: var(--maroon-900);
+    background-image:
+      radial-gradient(1100px 600px at 15% -10%, var(--maroon-700) 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, var(--maroon-600) 0%, transparent 55%),
+      linear-gradient(160deg, var(--maroon-900), #2a0910 70%);
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    color: var(--ink);
+  }
+
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 48px 20px;
+  }
+
+  .shell{
+    width:100%;
+    max-width: 560px;
+    position: relative;
+  }
+
+  .card{
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: 
+      inset 0 1px 0 rgba(255,255,255,0.1),
+      inset 0 2px 8px rgba(61,13,21,0.08),
+      0 1px 2px rgba(61,13,21,0.06), 
+      0 12px 32px -8px rgba(61,13,21,0.22), 
+      0 24px 60px -20px rgba(61,13,21,0.18);
+    overflow:hidden;
+    border: 1px solid rgba(61,13,21,0.12);
+  }
+
+  .form-section{
+    flex: 0 0 560px;
+    position: relative;
+  }
+
+  .form-section.blurred .card-top,
+  .form-section.blurred form{
+    filter: blur(4px);
+    pointer-events: none;
+  }
+
+  .eyebrow-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom: 18px;
+    padding: 0 4px;
+  }
+
+  .brand{
+    color: var(--maroon-100);
+    font-size: 15px;
+    font-weight:700;
+    letter-spacing: 0.2px;
+  }
+
+  .brand span{
+    color: var(--white);
+    opacity:0.55;
+    font-weight:400;
+    margin-left:8px;
+    font-size:13px;
+  }
+
+  .card-top{
+    padding: 34px 36px 6px 36px;
+    border-bottom: 1px solid transparent;
+  }
+
+  .card-top h1{
+    margin:0 0 8px 0;
+    font-size: 26px;
+    line-height:1.25;
+    font-weight:700;
+    color: var(--maroon-900);
+    letter-spacing: -0.2px;
+  }
+
+  .card-top p{
+    margin:0 0 26px 0;
+    font-size: 14.5px;
+    line-height:1.55;
+    color: var(--ink-soft);
+    max-width: 46ch;
+  }
+
+  form{
+    padding: 4px 36px 36px 36px;
+    display:flex;
+    flex-direction:column;
+    gap: 22px;
+  }
+
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+
+  .field label{
+    font-size: 13px;
+    font-weight:700;
+    color: var(--maroon-900);
+  }
+
+  .field-hint{
+    font-size:12px;
+    color: var(--ink-soft);
+    font-weight:400;
+    margin-left:6px;
+  }
+
+  .input-wrap{
+    position:relative;
+    display:flex;
+  }
+
+  input[type="email"],
+  textarea{
+    width:100%;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 12px 40px 12px 14px;
+    transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  }
+
+  textarea{
+    min-height: 128px;
+    resize: vertical;
+    line-height:1.5;
+    padding-right: 14px;
+  }
+
+  input[type="email"]{
+    height: 46px;
+  }
+
+  input[type="email"]::placeholder,
+  textarea::placeholder{
+    color: #b79aa0;
+  }
+
+  input[type="email"]:focus,
+  textarea:focus{
+    outline:none;
+    border-color: var(--maroon-500);
+    box-shadow: 0 0 0 4px var(--maroon-100);
+    background: var(--white);
+  }
+
+  .field.invalid input,
+  .field.invalid textarea{
+    border-color: var(--error);
+  }
+
+  .field.invalid input:focus,
+  .field.invalid textarea:focus{
+    box-shadow: 0 0 0 4px rgba(165,34,47,0.12);
+  }
+
+  input:disabled,
+  textarea:disabled{
+    background: #f2eeee;
+    color: #9a8286;
+    cursor: not-allowed;
+  }
+
+  .clear-btn{
+    position:absolute;
+    right:8px;
+    top:8px;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    border:none;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    transition: background 120ms ease, color 120ms ease;
+  }
+
+  textarea ~ .clear-btn{
+    top:8px;
+  }
+
+  .clear-btn:hover{
+    background: var(--maroon-100);
+    color: var(--maroon-700);
+  }
+
+  .clear-btn.show{
+    display:flex;
+  }
+
+  .clear-btn:disabled{
+    display:none;
+  }
+
+  .error-msg{
+    min-height: 16px;
+    font-size: 12.5px;
+    color: var(--error);
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+
+  .error-msg::before{
+    content:"";
+  }
+
+  .error-msg.show::before{
+    content:"⚠";
+    font-size:12px;
+  }
+
+  .actions{
+    margin-top: 4px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .submit-btn{
+    width:100%;
+    height: 50px;
+    border-radius: var(--radius-md);
+    border:none;
+    background: linear-gradient(180deg, var(--maroon-600), var(--maroon-700));
+    color: var(--white);
+    font-size: 15.5px;
+    font-weight:700;
+    letter-spacing:0.2px;
+    cursor:pointer;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 8px 20px -8px rgba(122,31,43,0.55);
+    transition: transform 100ms ease, box-shadow 100ms ease, filter 100ms ease;
+  }
+
+  .submit-btn:hover{
+    filter: brightness(1.05);
+  }
+
+  .submit-btn:active{
+    transform: translateY(1px);
+  }
+
+  .submit-btn:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
+    filter:none;
+    transform:none;
+  }
+
+  /* ---------- Loading state ---------- */
+
+  .diamond-wrap{
+    position:relative;
+    width:48px;
+    height:48px;
+    flex:none;
+  }
+
+  .diamond{
+    position:absolute;
+    inset:0;
+    margin:auto;
+    width:34px;
+    height:34px;
+    background: linear-gradient(135deg, var(--blue-300), var(--blue-500));
+    transform: rotate(45deg);
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(52,89,214,0.65);
+    animation: spin-diamond 1.1s cubic-bezier(0.65,0,0.35,1) infinite;
+  }
+
+  .diamond.success{
+    background: linear-gradient(135deg, #86efac, #22c55e);
+    box-shadow: 0 0 20px rgba(34,197,94,0.65);
+  }
+
+  .diamond.error{
+    background: linear-gradient(135deg, #fca5a5, var(--error));
+    box-shadow: 0 0 20px rgba(165,34,47,0.65);
+  }
+
+  @keyframes spin-diamond{
+    0%   { transform: rotate(45deg) scale(1); }
+    50%  { transform: rotate(225deg) scale(0.8); }
+    100% { transform: rotate(405deg) scale(1); }
+  }
+
+  .loading-text{
+    font-size: 17px;
+    font-weight:700;
+    color: var(--maroon-900);
+    text-align: center;
+  }
+
+  .loading-text small{
+    display:block;
+    font-weight:400;
+    color: var(--ink-soft);
+    font-size:14px;
+    margin-top:4px;
+  }
+
+  .loading-text.success{
+    color: #16a34a;
+  }
+
+  .loading-text.success small{
+    color: #166534;
+  }
+
+  .loading-text.error{
+    color: var(--error);
+  }
+
+  .loading-text.error small{
+    color: #7a1a23;
+  }
+
+  /* ---------- Overlay loading ---------- */
+  
+  .overlay-loading{
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .overlay-loading.show{
+    display: flex;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .diamond{ animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="eyebrow-row">
+    <div class="brand">Reply Form</div>
+  </div>
+
+  <div class="card">
+    <div class="form-section" id="formSection">
+      <div class="card-top">
+        <h1>Send your message</h1>
+        <p>Tell us what you need. We'll pass it along and show you the reply here, along with whether a confirmation email went out.</p>
+      </div>
+
+      <form id="leadForm" novalidate>
+        <div class="field" id="emailField">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <input type="email" id="email" name="email" placeholder="you@company.com" autocomplete="email">
+            <button type="button" class="clear-btn" id="clearEmail" aria-label="Clear email">&times;</button>
+          </div>
+          <div class="error-msg" id="emailError"></div>
+        </div>
+
+        <div class="field" id="messageField">
+          <label for="message">Your message <span class="field-hint">min. 10 characters</span></label>
+          <div class="input-wrap">
+            <textarea id="message" name="message" placeholder="What can we help with?"></textarea>
+            <button type="button" class="clear-btn" id="clearMessage" aria-label="Clear message">&times;</button>
+          </div>
+          <div class="error-msg" id="messageError"></div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="submit-btn" id="submitBtn">Send message</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="overlay-loading" id="overlayLoading">
+      <div class="diamond-wrap">
+        <div class="diamond"></div>
+      </div>
+      <div class="loading-text">
+        Sending your message
+        <small>Waiting on a reply&hellip;</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const WEBHOOK_URL = "https://alfar-abu.app.n8n.cloud/webhook/7b1b91db-49a2-4561-bb88-c152d6c22e5b";
+
+  const form = document.getElementById('leadForm');
+  const emailInput = document.getElementById('email');
+  const messageInput = document.getElementById('message');
+  const emailField = document.getElementById('emailField');
+  const messageField = document.getElementById('messageField');
+  const emailError = document.getElementById('emailError');
+  const messageError = document.getElementById('messageError');
+  const clearEmail = document.getElementById('clearEmail');
+  const clearMessage = document.getElementById('clearMessage');
+  const submitBtn = document.getElementById('submitBtn');
+  const formSection = document.getElementById('formSection');
+  const overlayLoading = document.getElementById('overlayLoading');
+
+  let controller = null;
+
+  function toggleClear(input, btn){
+    btn.classList.toggle('show', input.value.length > 0);
+  }
+
+  emailInput.addEventListener('input', () => { toggleClear(emailInput, clearEmail); clearFieldError('email'); });
+  messageInput.addEventListener('input', () => { toggleClear(messageInput, clearMessage); clearFieldError('message'); });
+
+  clearEmail.addEventListener('click', () => {
+    emailInput.value = '';
+    toggleClear(emailInput, clearEmail);
+    clearFieldError('email');
+    emailInput.focus();
+  });
+
+  clearMessage.addEventListener('click', () => {
+    messageInput.value = '';
+    toggleClear(messageInput, clearMessage);
+    clearFieldError('message');
+    messageInput.focus();
+  });
+
+  function clearFieldError(which){
+    if(which === 'email'){
+      emailField.classList.remove('invalid');
+      emailError.classList.remove('show');
+      emailError.textContent = '';
+    } else {
+      messageField.classList.remove('invalid');
+      messageError.classList.remove('show');
+      messageError.textContent = '';
+    }
+  }
+
+  function setFieldError(which, msg){
+    if(which === 'email'){
+      emailField.classList.add('invalid');
+      emailError.classList.add('show');
+      emailError.textContent = msg;
+    } else {
+      messageField.classList.add('invalid');
+      messageError.classList.add('show');
+      messageError.textContent = msg;
+    }
+  }
+
+  function isValidEmail(value){
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  function validate(){
+    let valid = true;
+    const emailVal = emailInput.value.trim();
+    const messageVal = messageInput.value.trim();
+
+    if(!emailVal){
+      setFieldError('email', 'Enter an email address.');
+      valid = false;
+    } else if(!isValidEmail(emailVal)){
+      setFieldError('email', 'Enter a valid email address.');
+      valid = false;
+    } else {
+      clearFieldError('email');
+    }
+
+    if(!messageVal){
+      setFieldError('message', 'Enter a message.');
+      valid = false;
+    } else if(messageVal.length < 10){
+      setFieldError('message', 'Message needs at least 10 characters.');
+      valid = false;
+    } else {
+      clearFieldError('message');
+    }
+
+    return valid;
+  }
+
+  function showLoading(){
+    formSection.classList.add('blurred');
+    overlayLoading.classList.add('show');
+    document.querySelector('.diamond').className = 'diamond';
+    document.querySelector('.loading-text').className = 'loading-text';
+    document.querySelector('.loading-text').innerHTML = 'Sending your message<small>Waiting on a reply&hellip;</small>';
+    emailInput.disabled = true;
+    messageInput.disabled = true;
+    clearEmail.disabled = true;
+    clearMessage.disabled = true;
+    submitBtn.disabled = true;
+  }
+
+  function hideLoading(){
+    formSection.classList.remove('blurred');
+    overlayLoading.classList.remove('show');
+    emailInput.disabled = false;
+    messageInput.disabled = false;
+    clearEmail.disabled = false;
+    clearMessage.disabled = false;
+    submitBtn.disabled = false;
+  }
+
+  function showSuccess(email){
+    document.querySelector('.diamond').className = 'diamond success';
+    document.querySelector('.loading-text').className = 'loading-text success';
+    document.querySelector('.loading-text').innerHTML = `Message sent!<small>Sent to ${email}</small>`;
+    
+    setTimeout(() => {
+      hideLoading();
+    }, 2000);
+  }
+
+  function showError(message){
+    document.querySelector('.diamond').className = 'diamond error';
+    document.querySelector('.loading-text').className = 'loading-text error';
+    document.querySelector('.loading-text').innerHTML = `Send failed<small>${message}</small>`;
+    
+    setTimeout(() => {
+      hideLoading();
+    }, 3000);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(!validate()) return;
+
+    const email = emailInput.value.trim();
+    const message = messageInput.value.trim();
+
+    controller = new AbortController();
+    showLoading();
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, email }),
+        signal: controller.signal
+      });
+
+      if(!res.ok){
+        throw new Error('Server responded with status ' + res.status);
+      }
+
+      showSuccess(email);
+
+    } catch(err){
+      if(err.name === 'AbortError'){
+        showError('You stopped the request.');
+      } else {
+        showError('Check your connection and try again.');
+      }
+    } finally {
+      controller = null;
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
