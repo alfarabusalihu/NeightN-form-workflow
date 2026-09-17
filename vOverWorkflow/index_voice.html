@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reply Desk — Send a message</title>
+<style>
+:root{
+  --maroon-900:#3d0d15;
+  --maroon-700:#7a1f2b;
+  --maroon-600:#8f2532;
+  --maroon-500:#a53445;
+  --maroon-200:#e6c3c8;
+  --maroon-100:#f3e2e4;
+  --maroon-50:#faf2f3;
+  --white:#ffffff;
+  --paper:#fdfbfb;
+  --ink:#241014;
+  --ink-soft:#6b4a4f;
+  --line:#e7d5d8;
+  --error:#a5222f;
+  --blue-500:#3459d6;
+  --blue-300:#8fa6ec;
+  --shadow-card: 0 1px 2px rgba(61,13,21,0.06), 0 12px 32px -8px rgba(61,13,21,0.22), 0 24px 60px -20px rgba(61,13,21,0.18);
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 7px;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0; padding:0; min-height:100%;
+  background: var(--maroon-900);
+  background-image:
+    radial-gradient(1100px 600px at 15% -10%, var(--maroon-700) 0%, transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, var(--maroon-600) 0%, transparent 55%),
+    linear-gradient(160deg, var(--maroon-900), #2a0910 70%);
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  color: var(--ink);
+}
+
+body{ display:flex; align-items:center; justify-content:center; padding: 32px 20px; }
+.shell{ width:100%; max-width: 1040px; }
+
+.layout{
+  display:flex; flex-direction:row; flex-wrap:wrap;
+  align-items:center; justify-content:center; gap: 48px;
+}
+
+.card{
+  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  overflow:hidden; border: 1px solid rgba(61,13,21,0.06);
+  flex: 0 1 500px; width:100%; max-width: 500px;
+}
+
+/* Title + description live directly on the dark background, beside the
+   card, not stacked above it -- keeps total page height close to the
+   card's own height so there's normally nothing to scroll. */
+.intro{
+  flex: 1 1 300px; max-width: 380px; min-width: 260px;
+  text-align:left;
+}
+.intro .brand{ color: var(--maroon-100); font-size: 14px; font-weight:700; letter-spacing: 0.2px; margin-bottom:14px; }
+.intro .brand span{ color: var(--white); opacity:0.55; font-weight:400; margin-left:8px; font-size:12.5px; }
+.intro h1{
+  margin:0 0 12px 0; font-size: 30px; line-height:1.22; font-weight:700;
+  color: var(--white); letter-spacing: -0.3px;
+}
+.intro p{
+  margin:0; font-size: 14px; line-height:1.5; color: rgba(255,255,255,0.72);
+  max-width: none; padding:0;
+}
+
+/* Only when there's truly not enough horizontal room does it wrap -- and
+   because the card comes first in the markup, the form shows above the
+   intro text rather than making the user scroll past a headline first. */
+@media (max-width: 620px){
+  .layout{ flex-direction:column; }
+  .intro{ text-align:center; max-width: 460px; }
+}
+
+form{ padding: 40px 40px 40px 40px; display:flex; flex-direction:column; gap: 22px; }
+.field{ display:flex; flex-direction:column; gap:7px; }
+.field-row{ display:flex; gap: 20px; }
+.field-row .field{ flex: 1 1 0; min-width:0; }
+.field label{ font-size: 13px; font-weight:700; color: var(--maroon-900); }
+.field-hint{ font-size:12px; color: var(--ink-soft); font-weight:400; margin-left:6px; }
+.input-wrap{ position:relative; display:flex; }
+
+input[type="text"], input[type="email"], textarea{
+  width:100%; font-family: inherit; font-size: 15px; color: var(--ink);
+  background: var(--paper); border: 1.5px solid var(--line);
+  border-radius: var(--radius-md); padding: 12px 40px 12px 14px;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+textarea{ min-height: 118px; resize: vertical; line-height:1.5; }
+input[type="text"], input[type="email"]{ height: 46px; }
+input::placeholder, textarea::placeholder{ color: #b79aa0; }
+input:focus, textarea:focus{ outline:none; border-color: var(--maroon-500); box-shadow: 0 0 0 4px var(--maroon-100); background: var(--white); }
+.field.invalid input, .field.invalid textarea{ border-color: var(--error); }
+.field.invalid input:focus, .field.invalid textarea:focus{ box-shadow: 0 0 0 4px rgba(165,34,47,0.12); }
+input:disabled, textarea:disabled{ background: #f2eeee; color: #9a8286; cursor: not-allowed; }
+
+.clear-btn{
+  position:absolute; right:8px; top:8px; width:26px; height:26px; border-radius:50%;
+  border:none; background: transparent; color: var(--ink-soft); font-size:15px; line-height:1;
+  cursor:pointer; display:none; align-items:center; justify-content:center;
+  transition: background 120ms ease, color 120ms ease;
+}
+.clear-btn:hover{ background: var(--maroon-100); color: var(--maroon-700); }
+.clear-btn.show{ display:flex; }
+.clear-btn:disabled{ display:none; }
+
+.error-msg{ min-height: 16px; font-size: 12.5px; color: var(--error); font-weight:600; display:flex; align-items:center; gap:5px; }
+.error-msg.show::before{ content:"⚠"; font-size:12px; }
+
+.segmented{ display:flex; background: var(--maroon-50); border: 1.5px solid var(--line); border-radius: var(--radius-md); padding: 4px; gap:4px; }
+.segmented button{
+  flex:1; border:none; background: transparent; padding: 9px 10px; font-family:inherit;
+  font-size: 13.5px; font-weight:700; color: var(--ink-soft); border-radius: 7px; cursor:pointer;
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+.segmented button.active{ background: var(--white); color: var(--maroon-700); box-shadow: 0 1px 3px rgba(61,13,21,0.15); }
+.segmented button:disabled{ cursor:not-allowed; opacity:0.6; }
+.env-url-preview{ font-size:12px; color: var(--ink-soft); margin-top:2px; word-break: break-all; }
+.env-url-preview b{ color: var(--maroon-700); font-weight:700; }
+
+.dropzone{
+  border: 1.75px dashed var(--maroon-200); border-radius: var(--radius-md); background: var(--maroon-50);
+  padding: 26px 18px; text-align:center; cursor:pointer; transition: border-color 140ms ease, background 140ms ease;
+}
+.dropzone.dragover{ border-color: var(--maroon-500); background: var(--maroon-100); }
+.dropzone.disabled{ cursor:not-allowed; opacity:0.65; }
+.dropzone .dz-icon{ margin-bottom:8px; }
+.dropzone .dz-title{ font-size: 14px; font-weight:700; color: var(--maroon-700); margin-bottom:3px; }
+.dropzone .dz-sub{ font-size: 12.5px; color: var(--ink-soft); }
+
+.dz-loading{ display:none; align-items:center; justify-content:center; gap:12px; padding: 4px 0; }
+.dz-loading.show{ display:flex; }
+.dz-file{
+  display:none; align-items:center; justify-content:space-between; gap:12px; background: var(--white);
+  border: 1.5px solid var(--maroon-200); border-radius: var(--radius-sm); padding: 12px 14px; text-align:left;
+}
+.dz-file.show{ display:flex; }
+.dz-file-info{ display:flex; align-items:center; gap:10px; min-width:0; }
+.dz-file-name{ font-size:13.5px; font-weight:700; color: var(--maroon-900); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px; }
+.dz-file-size{ font-size:12px; color: var(--ink-soft); }
+.dz-remove{ border:none; background: transparent; color: var(--ink-soft); font-size:14px; cursor:pointer; padding:6px 8px; border-radius:6px; font-weight:700; flex:none; }
+.dz-remove:hover{ background: var(--maroon-100); color: var(--error); }
+.dz-remove:disabled{ display:none; }
+
+.diamond-wrap{ position:relative; width:28px; height:28px; flex:none; }
+.diamond-wrap.lg{ width:34px; height:34px; }
+.diamond{
+  position:absolute; inset:0; margin:auto; width:18px; height:18px;
+  background: linear-gradient(135deg, var(--blue-300), var(--blue-500)); transform: rotate(45deg); border-radius: 3px;
+  box-shadow: 0 0 14px rgba(52,89,214,0.55); animation: spin-diamond 1.1s cubic-bezier(0.65,0,0.35,1) infinite;
+}
+.diamond-wrap.lg .diamond{ width:22px; height:22px; }
+.diamond.outer{ width:28px; height:28px; background: transparent; border: 2px solid var(--blue-300); opacity:0.55; box-shadow:none; animation: spin-diamond-rev 2.1s linear infinite; }
+.diamond-wrap.lg .diamond.outer{ width:34px; height:34px; }
+@keyframes spin-diamond{ 0%{ transform: rotate(45deg) scale(1);} 50%{ transform: rotate(225deg) scale(0.8);} 100%{ transform: rotate(405deg) scale(1);} }
+@keyframes spin-diamond-rev{ 0%{ transform: rotate(45deg);} 100%{ transform: rotate(-315deg);} }
+.dz-loading-text{ font-size:13.5px; font-weight:700; color: var(--maroon-700); }
+
+.actions{ margin-top: 4px; display:flex; flex-direction:column; gap:12px; }
+.submit-btn{
+  width:100%; height: 50px; border-radius: var(--radius-md); border:none;
+  background: linear-gradient(180deg, var(--maroon-600), var(--maroon-700)); color: var(--white);
+  font-size: 15.5px; font-weight:700; letter-spacing:0.2px; cursor:pointer;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 8px 20px -8px rgba(122,31,43,0.55);
+  transition: transform 100ms ease, filter 100ms ease;
+}
+.submit-btn:hover{ filter: brightness(1.05); }
+.submit-btn:active{ transform: translateY(1px); }
+.submit-btn:disabled{ opacity:0.6; cursor:not-allowed; filter:none; transform:none; }
+
+.loading-row{ display:none; align-items:center; justify-content:center; gap:16px; padding: 10px 0 2px 0; }
+.loading-row.show{ display:flex; }
+.loading-text{ font-size: 14.5px; font-weight:700; color: var(--maroon-700); }
+.loading-text small{ display:block; font-weight:400; color: var(--ink-soft); font-size:12.5px; margin-top:2px; }
+.stop-btn{
+  margin-left:4px; border: 1.5px solid var(--line); background: var(--white); color: var(--maroon-700);
+  font-weight:700; font-size: 13px; padding: 8px 14px; border-radius: 999px; cursor:pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.stop-btn:hover{ background: var(--maroon-100); border-color: var(--maroon-500); }
+
+@keyframes fade-in{ from{ opacity:0; transform: translateY(4px);} to{ opacity:1; transform: translateY(0);} }
+.result-block{ display:flex; flex-direction:column; gap:6px; }
+.result-label{ font-size:12.5px; font-weight:700; color: var(--maroon-700); }
+.result-sub{ font-size:13px; color: var(--ink-soft); }
+.result-body{
+  font-size: 14.5px; line-height:1.6; color: var(--ink); background: var(--maroon-50);
+  border: 1px solid var(--maroon-100); border-radius: var(--radius-md); padding: 14px 16px;
+  white-space: pre-wrap; word-break: break-word;
+}
+.status-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding-top:4px; border-top: 1px solid var(--line); }
+.badge{ display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding: 7px 13px; border-radius: 999px; }
+.badge.yes{ background: var(--maroon-700); color: var(--white); }
+.badge.no{ background: var(--white); color: var(--maroon-700); border: 1.5px solid var(--maroon-500); }
+.badge-dot{ width:7px; height:7px; border-radius:50%; background: currentColor; }
+
+.new-btn{ align-self:flex-start; margin-top:2px; background:none; border:none; color: var(--maroon-700); font-weight:700; font-size:13.5px; cursor:pointer; padding:0; text-decoration: underline; text-underline-offset:3px; }
+
+body.modal-open{ overflow:hidden; }
+body.modal-open .shell{ filter: blur(6px); transform: scale(0.995); }
+
+.modal-layer{
+  position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center;
+  padding: 24px; background: rgba(36,16,20,0.42); animation: fade-in 180ms ease;
+}
+.modal-layer.show{ display:flex; }
+.modal-dialog{
+  width:min(520px, 100%); max-height:calc(100vh - 48px); overflow:auto;
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: 0 22px 60px -18px rgba(36,16,20,0.55); border:1px solid rgba(61,13,21,0.08);
+  padding: 28px; position:relative;
+}
+.modal-close{
+  position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%;
+  border:none; background: transparent; color: var(--ink-soft); font-size:20px; line-height:1;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.modal-close:hover{ background: var(--maroon-100); color: var(--maroon-700); }
+.result .modal-dialog{ display:flex; flex-direction:column; gap:20px; }
+.result.show{ display:flex; }
+.banner-title{ font-weight:700; color: var(--error); font-size:16px; padding-right:34px; margin-bottom:10px; }
+.banner-body{ font-size:14px; color: var(--ink-soft); line-height:1.5; margin-bottom:18px; }
+.banner.cancelled .banner-title{ color: var(--maroon-700); }
+.banner .new-btn{ align-self:auto; }
+
+@media (max-width: 560px){
+  .field-row{ flex-direction:column; gap:22px; }
+}
+
+@media (max-width: 480px){
+  form{ padding-left:22px; padding-right:22px; }
+  .modal-layer{ padding:18px; }
+  .modal-dialog{ padding:24px; max-height:calc(100vh - 36px); }
+  .intro h1{ font-size:26px; }
+  .dz-file-name{ max-width:160px; }
+}
+@media (prefers-reduced-motion: reduce){ .diamond, .diamond.outer{ animation: none; } }
+
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="layout">
+
+    <div class="card">
+    <form id="leadForm" novalidate>
+
+      <div class="field-row">
+        <div class="field" id="usernameField">
+          <label for="username">Name</label>
+          <div class="input-wrap">
+            <input type="text" id="username" name="username" placeholder="Jordan Lee" autocomplete="name">
+            <button type="button" class="clear-btn" id="clearUsername" aria-label="Clear name">&times;</button>
+          </div>
+          <div class="error-msg" id="usernameError"></div>
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <input type="email" id="email" name="email" placeholder="you@company.com" autocomplete="email">
+            <button type="button" class="clear-btn" id="clearEmail" aria-label="Clear email">&times;</button>
+          </div>
+          <div class="error-msg" id="emailError"></div>
+        </div>
+      </div>
+
+      <div class="field" id="modeField">
+        <label>Message content</label>
+        <div class="segmented" id="modeToggle">
+          <button type="button" class="active" data-mode="text">Write a message</button>
+          <button type="button" data-mode="pdf">Upload a PDF</button>
+        </div>
+
+        <div id="textModeBlock">
+          <div class="input-wrap" style="margin-top:10px;">
+            <textarea id="message" name="message" placeholder="What can we help with?"></textarea>
+            <button type="button" class="clear-btn" id="clearMessage" aria-label="Clear message">&times;</button>
+          </div>
+        </div>
+
+        <div id="pdfModeBlock" style="display:none; margin-top:10px;">
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload a PDF">
+            <input type="file" id="pdfInput" accept="application/pdf,.pdf" style="display:none;">
+
+            <div id="dzPrompt">
+              <div class="dz-icon">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 3v12M12 3l-4 4M12 3l4 4" stroke="#7a1f2b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4 16v2.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V16" stroke="#7a1f2b" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="dz-title">Drag &amp; drop a PDF here</div>
+              <div class="dz-sub">or click to browse &middot; max 15&nbsp;MB</div>
+            </div>
+
+            <div class="dz-loading" id="dzLoading">
+              <div class="diamond-wrap">
+                <div class="diamond outer"></div>
+                <div class="diamond"></div>
+              </div>
+              <div class="dz-loading-text">Adding PDF&hellip;</div>
+            </div>
+
+            <div class="dz-file" id="dzFile">
+              <div class="dz-file-info">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex:none;">
+                  <path d="M6 2.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 20V4A1.5 1.5 0 0 1 5.5 2.5H6Z" stroke="#7a1f2b" stroke-width="1.6"/>
+                  <path d="M14 2.5V7h4.5" stroke="#7a1f2b" stroke-width="1.6" stroke-linejoin="round"/>
+                </svg>
+                <div>
+                  <div class="dz-file-name" id="dzFileName">document.pdf</div>
+                  <div class="dz-file-size" id="dzFileSize">PDF added</div>
+                </div>
+              </div>
+              <button type="button" class="dz-remove" id="dzRemove" aria-label="Remove PDF">Remove</button>
+            </div>
+          </div>
+          <div class="error-msg" id="pdfError"></div>
+        </div>
+      </div>
+
+      <div class="field" id="envField">
+        <label>Send to</label>
+        <div class="segmented" id="envToggle">
+          <button type="button" class="active" data-env="test">Test</button>
+          <button type="button" data-env="prod">Production</button>
+        </div>
+        <div class="env-url-preview"><b>URL:</b> <span id="envUrlPreview"></span></div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="submit-btn" id="submitBtn">Send message</button>
+
+        <div class="loading-row" id="loadingRow">
+          <div class="diamond-wrap lg">
+            <div class="diamond outer"></div>
+            <div class="diamond"></div>
+          </div>
+          <div class="loading-text">
+            Sending your message
+            <small>Waiting on a reply&hellip;</small>
+          </div>
+          <button type="button" class="stop-btn" id="stopBtn">Stop</button>
+        </div>
+      </div>
+    </form>
+
+    </div>
+
+    <div class="intro">
+      <div class="brand">Reply Desk<span>lead intake</span></div>
+      <h1>Send your message, get a reply</h1>
+      <p>Paste a note or drop a PDF, and we'll pass it along. You'll see the reply here, plus whether a confirmation email went out.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="result modal-layer" id="resultBlock" role="dialog" aria-modal="true" aria-labelledby="resultReplyLabel">
+  <div class="modal-dialog">
+    <button type="button" class="modal-close" id="resultCloseBtn" aria-label="Close">&times;</button>
+    <div class="result-block">
+      <div class="result-label">From</div>
+      <div class="result-sub" id="resultFrom"></div>
+    </div>
+    <div class="result-block">
+      <div class="result-label">Message</div>
+      <div class="result-body" id="resultMessage"></div>
+    </div>
+    <div class="result-block">
+      <div class="result-label" id="resultReplyLabel">Reply</div>
+      <div class="result-body" id="resultReply"></div>
+    </div>
+    <div class="status-row">
+      <div class="result-label">Confirmation email</div>
+      <span class="badge" id="resultEmailBadge"></span>
+    </div>
+    <button type="button" class="new-btn" id="newMessageBtn">Send another message</button>
+  </div>
+</div>
+
+<div class="banner modal-layer" id="errorBanner" role="dialog" aria-modal="true" aria-labelledby="bannerTitle" aria-describedby="bannerBody">
+  <div class="modal-dialog">
+    <button type="button" class="modal-close" id="bannerCloseBtn" aria-label="Close">&times;</button>
+    <div class="banner-title" id="bannerTitle">Something went wrong</div>
+    <div class="banner-body" id="bannerBody"></div>
+    <button type="button" class="new-btn" id="tryAgainBtn">Try again</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const URLS = {
+    test: "https://alfar-abu.app.n8n.cloud/webhook-test/voice-note-form",
+    prod: "https://alfar-abu.app.n8n.cloud/webhook/voice-note-form"
+  };
+  const MAX_PDF_BYTES = 15 * 1024 * 1024;
+  const MIN_NAME_LENGTH = 6; // "more than 5 characters"
+  const MIN_MESSAGE_LENGTH = 10;
+
+  // Elements
+  const form = document.getElementById('leadForm');
+  const usernameInput = document.getElementById('username');
+  const emailInput = document.getElementById('email');
+  const messageInput = document.getElementById('message');
+  const usernameField = document.getElementById('usernameField');
+  const emailField = document.getElementById('emailField');
+  const usernameError = document.getElementById('usernameError');
+  const emailError = document.getElementById('emailError');
+  const messageError = document.getElementById('messageError');
+  const clearUsername = document.getElementById('clearUsername');
+  const clearEmail = document.getElementById('clearEmail');
+  const clearMessage = document.getElementById('clearMessage');
+
+  const modeToggle = document.getElementById('modeToggle');
+  const textModeBlock = document.getElementById('textModeBlock');
+  const pdfModeBlock = document.getElementById('pdfModeBlock');
+  const pdfError = document.getElementById('pdfError');
+
+  const dropzone = document.getElementById('dropzone');
+  const pdfInput = document.getElementById('pdfInput');
+  const dzPrompt = document.getElementById('dzPrompt');
+  const dzLoading = document.getElementById('dzLoading');
+  const dzFile = document.getElementById('dzFile');
+  const dzFileName = document.getElementById('dzFileName');
+  const dzFileSize = document.getElementById('dzFileSize');
+  const dzRemove = document.getElementById('dzRemove');
+
+  const envToggle = document.getElementById('envToggle');
+  const envUrlPreview = document.getElementById('envUrlPreview');
+
+  const submitBtn = document.getElementById('submitBtn');
+  const loadingRow = document.getElementById('loadingRow');
+  const stopBtn = document.getElementById('stopBtn');
+
+  const resultBlock = document.getElementById('resultBlock');
+  const resultFrom = document.getElementById('resultFrom');
+  const resultMessage = document.getElementById('resultMessage');
+  const resultReply = document.getElementById('resultReply');
+  const resultEmailBadge = document.getElementById('resultEmailBadge');
+  const resultCloseBtn = document.getElementById('resultCloseBtn');
+  const newMessageBtn = document.getElementById('newMessageBtn');
+
+  const errorBanner = document.getElementById('errorBanner');
+  const bannerTitle = document.getElementById('bannerTitle');
+  const bannerBody = document.getElementById('bannerBody');
+  const bannerCloseBtn = document.getElementById('bannerCloseBtn');
+  const tryAgainBtn = document.getElementById('tryAgainBtn');
+
+  // State
+  let mode = 'text';           // 'text' | 'pdf'
+  let env = 'test';            // 'test' | 'prod'
+  let pdfFile = null;          // File object once added
+  let controller = null;       // AbortController for main submit
+  let busy = false;            // main submit in-flight
+  let pdfAdding = false;       // pdf "loading" in-flight
+
+  envUrlPreview.textContent = URLS[env];
+
+  // ---------- helpers ----------
+
+  function toggleClear(input, btn){ btn.classList.toggle('show', input.value.length > 0); }
+
+  function clearFieldError(which){
+    const map = { username: [usernameField, usernameError], email: [emailField, emailError] };
+    const pair = map[which];
+    pair[0].classList.remove('invalid');
+    pair[1].classList.remove('show');
+    pair[1].textContent = '';
+  }
+
+  function setFieldError(which, msg){
+    const map = { username: [usernameField, usernameError], email: [emailField, emailError] };
+    const pair = map[which];
+    pair[0].classList.add('invalid');
+    pair[1].classList.add('show');
+    pair[1].textContent = msg;
+  }
+
+  function clearPdfError(){ pdfError.classList.remove('show'); pdfError.textContent = ''; }
+  function setPdfError(msg){ pdfError.classList.add('show'); pdfError.textContent = msg; }
+
+  function clearMessageError(){
+    document.getElementById('modeField').classList.remove('invalid');
+    if(messageError){ messageError.classList.remove('show'); messageError.textContent = ''; }
+  }
+
+  function showMessageError(msg){
+    document.getElementById('modeField').classList.add('invalid');
+    if(messageError){ messageError.classList.add('show'); messageError.textContent = msg; }
+  }
+
+  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  function formatBytes(bytes){
+    if(bytes < 1024) return bytes + ' B';
+    if(bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // ---------- mode toggle ----------
+
+  modeToggle.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-mode]');
+    if(!btn || busy || pdfAdding) return;
+    setMode(btn.dataset.mode);
+  });
+
+  function setMode(newMode){
+    mode = newMode;
+    modeToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    textModeBlock.style.display = mode === 'text' ? 'block' : 'none';
+    pdfModeBlock.style.display = mode === 'pdf' ? 'block' : 'none';
+    clearMessageError();
+    clearPdfError();
+  }
+
+  // ---------- env toggle ----------
+
+  envToggle.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-env]');
+    if(!btn || busy) return;
+    env = btn.dataset.env;
+    envToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.env === env));
+    envUrlPreview.textContent = URLS[env];
+  });
+
+  // ---------- text field wiring ----------
+
+  usernameInput.addEventListener('input', () => { toggleClear(usernameInput, clearUsername); clearFieldError('username'); });
+  emailInput.addEventListener('input', () => { toggleClear(emailInput, clearEmail); clearFieldError('email'); });
+  messageInput.addEventListener('input', () => { toggleClear(messageInput, clearMessage); clearMessageError(); });
+
+  clearUsername.addEventListener('click', () => { usernameInput.value = ''; toggleClear(usernameInput, clearUsername); clearFieldError('username'); usernameInput.focus(); });
+  clearEmail.addEventListener('click', () => { emailInput.value = ''; toggleClear(emailInput, clearEmail); clearFieldError('email'); emailInput.focus(); });
+  clearMessage.addEventListener('click', () => { messageInput.value = ''; toggleClear(messageInput, clearMessage); clearMessageError(); messageInput.focus(); });
+
+  // ---------- dropzone wiring ----------
+
+  dropzone.addEventListener('click', () => { if(!pdfAdding && !busy && !pdfFile) pdfInput.click(); });
+  dropzone.addEventListener('keydown', (e) => {
+    if((e.key === 'Enter' || e.key === ' ') && !pdfAdding && !busy && !pdfFile){
+      e.preventDefault(); pdfInput.click();
+    }
+  });
+
+  ['dragenter', 'dragover'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      if(pdfAdding || busy || pdfFile) return;
+      dropzone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(evt => {
+    dropzone.addEventListener(evt, (e) => {
+      e.preventDefault(); e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    });
+  });
+  dropzone.addEventListener('drop', (e) => {
+    if(pdfAdding || busy || pdfFile) return;
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(file) handleFile(file);
+  });
+
+  pdfInput.addEventListener('change', () => {
+    const file = pdfInput.files && pdfInput.files[0];
+    if(file) handleFile(file);
+    pdfInput.value = '';
+  });
+
+  function handleFile(file){
+    clearPdfError();
+    const looksLikePdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+    if(!looksLikePdf){ setPdfError('Only PDF files are accepted.'); return; }
+    if(file.size > MAX_PDF_BYTES){ setPdfError('That file is over the 15 MB limit.'); return; }
+
+    pdfAdding = true;
+    dzPrompt.style.display = 'none';
+    dzLoading.classList.add('show');
+    updateSubmitAvailability();
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      pdfFile = file;
+      pdfAdding = false;
+      dzLoading.classList.remove('show');
+      dzFileName.textContent = file.name;
+      dzFileSize.textContent = formatBytes(file.size) + ' \u00b7 PDF added';
+      dzFile.classList.add('show');
+      updateSubmitAvailability();
+    };
+    reader.onerror = () => {
+      pdfAdding = false;
+      dzLoading.classList.remove('show');
+      dzPrompt.style.display = 'block';
+      setPdfError('Could not read that file. Try again.');
+      updateSubmitAvailability();
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  dzRemove.addEventListener('click', () => {
+    pdfFile = null;
+    dzFile.classList.remove('show');
+    dzPrompt.style.display = 'block';
+    clearPdfError();
+    updateSubmitAvailability();
+  });
+
+  function updateSubmitAvailability(){
+    submitBtn.disabled = busy || pdfAdding;
+  }
+
+  // ---------- validation ----------
+  // Rules: name > 5 characters · email must be valid · either a message or a
+  // PDF is required (never both empty) · all three fields are mandatory.
+
+  function validate(){
+    let valid = true;
+    const usernameVal = usernameInput.value.trim();
+    const emailVal = emailInput.value.trim();
+
+    if(!usernameVal){ setFieldError('username', 'Name is required.'); valid = false; }
+    else if(usernameVal.length <= MIN_NAME_LENGTH - 1){ setFieldError('username', 'Name must be more than 5 characters.'); valid = false; }
+    else clearFieldError('username');
+
+    if(!emailVal){ setFieldError('email', 'Email is required.'); valid = false; }
+    else if(!isValidEmail(emailVal)){ setFieldError('email', 'Enter a valid email address.'); valid = false; }
+    else clearFieldError('email');
+
+    if(mode === 'text'){
+      const messageVal = messageInput.value.trim();
+      clearPdfError();
+      if(!messageVal){ showMessageError('Message is required.'); valid = false; }
+      else clearMessageError();
+    } else {
+      clearMessageError();
+      if(!pdfFile){ setPdfError('A PDF is required.'); valid = false; }
+      else clearPdfError();
+    }
+
+    return valid;
+  }
+
+  // ---------- busy state ----------
+
+  function setBusy(isBusy){
+    busy = isBusy;
+    usernameInput.disabled = isBusy;
+    emailInput.disabled = isBusy;
+    messageInput.disabled = isBusy;
+    clearUsername.disabled = isBusy;
+    clearEmail.disabled = isBusy;
+    clearMessage.disabled = isBusy;
+    dzRemove.disabled = isBusy;
+    dropzone.classList.toggle('disabled', isBusy);
+    modeToggle.querySelectorAll('button').forEach(b => b.disabled = isBusy);
+    envToggle.querySelectorAll('button').forEach(b => b.disabled = isBusy);
+    submitBtn.style.display = isBusy ? 'none' : 'block';
+    loadingRow.classList.toggle('show', isBusy);
+    updateSubmitAvailability();
+  }
+
+  function hideOutcomes(){
+    resultBlock.classList.remove('show');
+    errorBanner.classList.remove('show');
+    document.body.classList.remove('modal-open');
+  }
+
+  function showResult(fromLabel, contentLabel, reply, emailSent){
+    resultFrom.textContent = fromLabel;
+    resultMessage.textContent = contentLabel;
+    resultReply.textContent = reply;
+
+    resultEmailBadge.innerHTML = '';
+    const dot = document.createElement('span'); dot.className = 'badge-dot';
+    const label = document.createElement('span');
+
+    if(emailSent === true){ resultEmailBadge.className = 'badge yes'; label.textContent = 'Sent'; }
+    else if(emailSent === false){ resultEmailBadge.className = 'badge no'; label.textContent = 'Not sent'; }
+    else { resultEmailBadge.className = 'badge no'; label.textContent = 'Unknown'; }
+
+    resultEmailBadge.appendChild(dot);
+    resultEmailBadge.appendChild(label);
+    resultBlock.classList.add('show');
+    document.body.classList.add('modal-open');
+    resultCloseBtn.focus();
+  }
+
+  function showBanner(title, body, isCancel){
+    bannerTitle.textContent = title;
+    bannerBody.textContent = body;
+    errorBanner.classList.toggle('cancelled', !!isCancel);
+    errorBanner.classList.add('show');
+    document.body.classList.add('modal-open');
+    bannerCloseBtn.focus();
+  }
+
+  function extractReply(data){
+    if(data == null) return '';
+    if(typeof data === 'string') return data;
+    if(Array.isArray(data)) return extractReply(data[0]);
+    return data.reply ?? data.response ?? data.output ?? data.text ?? data.message_reply ?? JSON.stringify(data);
+  }
+
+  function extractEmailSent(data){
+    if(data == null || typeof data !== 'object') return null;
+    const source = Array.isArray(data) ? data[0] : data;
+    if(source == null || typeof source !== 'object') return null;
+    const val = source.emailSent ?? source.email_sent ?? source.sent ?? source.emailSuccess ?? null;
+    if(typeof val === 'boolean') return val;
+    if(typeof val === 'string') return val.toLowerCase() === 'true';
+    return null;
+  }
+
+  // ---------- submit ----------
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if(pdfAdding) return;
+    if(!validate()) return;
+
+    hideOutcomes();
+
+    const username = usernameInput.value.trim();
+    const email = emailInput.value.trim();
+    const message = messageInput.value.trim();
+
+    // Multipart/form-data is the right transport here because the payload
+    // can include a binary PDF alongside plain fields. JSON would force the
+    // PDF into base64 text, bloating the request and complicating parsing
+    // server-side, so FormData + fetch is used instead of a JSON body.
+    const formData = new FormData();
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('contentType', mode);
+    formData.append('environment', env);
+    if(mode === 'text'){
+      formData.append('message', message);
+    } else {
+      formData.append('pdf', pdfFile, pdfFile.name);
+    }
+
+    controller = new AbortController();
+    setBusy(true);
+
+    try {
+      const res = await fetch(URLS[env], { method: 'POST', body: formData, signal: controller.signal });
+      if(!res.ok) throw new Error('Server responded with status ' + res.status);
+
+      let data = null;
+      const contentType = res.headers.get('content-type') || '';
+      if(contentType.includes('application/json')){
+        data = await res.json();
+      } else {
+        const raw = await res.text();
+        try { data = JSON.parse(raw); } catch(_) { data = raw; }
+      }
+
+      const reply = extractReply(data);
+      const emailSent = extractEmailSent(data);
+      const contentLabel = mode === 'text' ? message : ('PDF: ' + pdfFile.name + ' (' + formatBytes(pdfFile.size) + ')');
+
+      setBusy(false);
+      if(!String(reply || '').trim()){
+        showBanner('No reply received', 'The workflow completed, but it did not return a reply to show. Please try again.', false);
+        return;
+      }
+
+      showResult(username + ' \u00b7 ' + email, contentLabel, reply, emailSent);
+
+    } catch(err){
+      setBusy(false);
+      if(err.name === 'AbortError'){
+        showBanner('Send cancelled', 'You stopped the request before a reply came back. Nothing was lost — your details are still in the form.', true);
+      } else {
+        showBanner('Couldn\u2019t send your message', 'There was a problem reaching the ' + (env === 'test' ? 'test' : 'production') + ' webhook. Check the URL, your connection, and try again.', false);
+      }
+    } finally {
+      controller = null;
+    }
+  });
+
+  stopBtn.addEventListener('click', () => { if(controller) controller.abort(); });
+
+  resultCloseBtn.addEventListener('click', () => { hideOutcomes(); });
+
+  newMessageBtn.addEventListener('click', () => {
+    hideOutcomes();
+    usernameInput.value = '';
+    emailInput.value = '';
+    messageInput.value = '';
+    pdfFile = null;
+    dzFile.classList.remove('show');
+    dzPrompt.style.display = 'block';
+    toggleClear(usernameInput, clearUsername);
+    toggleClear(emailInput, clearEmail);
+    toggleClear(messageInput, clearMessage);
+    clearFieldError('username');
+    clearFieldError('email');
+    clearMessageError();
+    clearPdfError();
+    updateSubmitAvailability();
+    usernameInput.focus();
+  });
+
+  bannerCloseBtn.addEventListener('click', () => { hideOutcomes(); });
+  tryAgainBtn.addEventListener('click', () => { hideOutcomes(); });
+  resultBlock.addEventListener('click', (e) => { if(e.target === resultBlock) hideOutcomes(); });
+  errorBanner.addEventListener('click', (e) => { if(e.target === errorBanner) hideOutcomes(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && (resultBlock.classList.contains('show') || errorBanner.classList.contains('show'))) hideOutcomes();
+  });
+})();
+
+</script>
+</body>
+</html>
