@@ -21,7 +21,11 @@
   --error:#a5222f;
   --blue-500:#3459d6;
   --blue-300:#8fa6ec;
-  --shadow-card: 0 1px 2px rgba(61,13,21,0.06), 0 12px 32px -8px rgba(61,13,21,0.22), 0 24px 60px -20px rgba(61,13,21,0.18);
+  --shadow-card:
+    inset 0 2px 7px rgba(61,13,21,0.16),
+    inset 0 0 0 1px rgba(61,13,21,0.08),
+    0 1px 0 rgba(255,255,255,0.12),
+    0 16px 38px -24px rgba(0,0,0,0.58);
   --radius-lg: 16px;
   --radius-md: 10px;
   --radius-sm: 7px;
@@ -40,17 +44,25 @@ html,body{
   color: var(--ink);
 }
 
-body{ display:flex; align-items:center; justify-content:center; padding: 32px 20px; }
-.shell{ width:100%; max-width: 1040px; }
+body{
+  display:flex; align-items:center; justify-content:center;
+  min-height:100vh; min-height:100dvh; padding: 32px 20px;
+}
+.shell{
+  width:100%; max-width: 1040px; min-height:calc(100vh - 64px); min-height:calc(100dvh - 64px);
+  display:flex; align-items:center; justify-content:center;
+}
 
 .layout{
+  width:100%;
   display:flex; flex-direction:row; flex-wrap:wrap;
   align-items:center; justify-content:center; gap: 48px;
 }
 
 .card{
-  background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
-  overflow:hidden; border: 1px solid rgba(61,13,21,0.06);
+  background: linear-gradient(180deg, #fffefe 0%, var(--white) 100%);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  overflow:hidden; border: 1px solid rgba(255,255,255,0.18);
   flex: 0 1 500px; width:100%; max-width: 500px;
 }
 
